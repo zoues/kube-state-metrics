@@ -1,8 +1,8 @@
 # Pod Metrics
 
-| Metric name| Metric type | Labels/tags |
-| ---------- | ----------- | ----------- |
-| kube_pod_info | Gauge | `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `host_ip`=&lt;host-ip&gt; <br> `pod_ip`=&lt;pod-ip&gt; <br> `start_time`=&lt;date-time since kubelet acknowledged pod&gt; <br> `node`=&lt;node-name&gt;<br> `created_by`=&lt;created_by&gt;  |
+| Metric name| Metric type | Labels/tags | Examples   |
+| ---------- | ----------- | ----------- |----------- |
+| kube_pod_info | Gauge | `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `host_ip`=&lt;host-ip&gt; <br> `pod_ip`=&lt;pod-ip&gt; <br> `start_time`=&lt;date-time since kubelet acknowledged pod&gt; <br> `node`=&lt;node-name&gt;<br> `created_by`=&lt;created_by&gt;  |kube_pod_info{host_ip="10.142.21.158",namespace="kube-system",pod="nginx-ingress-controller-49379976-bsw1p",pod_ip="10.142.21.158"} 1|
 | kube_pod_labels | Gauge | `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `label_POD_LABEL`=&lt;POD_LABEL&gt;  |
 | kube_pod_status_phase | Gauge | `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `phase`=&lt;Pending\|Running\|Succeeded\|Failed\|Unknown&gt; |
 | kube_pod_status_ready | Gauge |  `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `condition`=&lt;true\|false\|unknown&gt; |
