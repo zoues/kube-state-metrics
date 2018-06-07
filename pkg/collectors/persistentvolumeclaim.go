@@ -28,7 +28,7 @@ import (
 var (
 	descPersistentVolumeClaimLabelsName          = "kube_persistentvolumeclaim_labels"
 	descPersistentVolumeClaimLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descPersistentVolumeClaimLabelsDefaultLabels = []string{"namespace", "persistentvolumeclaim"}
+	descPersistentVolumeClaimLabelsDefaultLabels = []string{"namespace", "persistentvolumeclaim", "uid"}
 
 	descPersistentVolumeClaimLabels = prometheus.NewDesc(
 		descPersistentVolumeClaimLabelsName,
@@ -44,6 +44,7 @@ var (
 			"persistentvolumeclaim",
 			"storageclass",
 			"volumename",
+			"uid",
 		}, nil,
 	)
 	descPersistentVolumeClaimStatusPhase = prometheus.NewDesc(
@@ -53,6 +54,7 @@ var (
 			"namespace",
 			"persistentvolumeclaim",
 			"phase",
+			"uid",
 		}, nil,
 	)
 	descPersistentVolumeClaimResourceRequestsStorage = prometheus.NewDesc(
@@ -61,6 +63,7 @@ var (
 		[]string{
 			"namespace",
 			"persistentvolumeclaim",
+			"uid",
 		}, nil,
 	)
 )
@@ -153,7 +156,7 @@ func getPersistentVolumeClaimClass(claim *v1.PersistentVolumeClaim) string {
 
 func (collector *persistentVolumeClaimCollector) collectPersistentVolumeClaim(ch chan<- prometheus.Metric, pvc v1.PersistentVolumeClaim) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{pvc.Namespace, pvc.Name}, lv...)
+		lv = append([]string{pvc.Namespace, pvc.Name, string(pvc.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 

@@ -34,7 +34,7 @@ import (
 var (
 	descCronJobLabelsName          = "kube_cronjob_labels"
 	descCronJobLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descCronJobLabelsDefaultLabels = []string{"namespace", "cronjob"}
+	descCronJobLabelsDefaultLabels = []string{"namespace", "cronjob", "uid"}
 
 	descCronJobLabels = prometheus.NewDesc(
 		descCronJobLabelsName,
@@ -45,37 +45,37 @@ var (
 	descCronJobInfo = prometheus.NewDesc(
 		"kube_cronjob_info",
 		"Info about cronjob.",
-		[]string{"namespace", "cronjob", "schedule", "concurrency_policy"}, nil,
+		[]string{"namespace", "cronjob", "schedule", "concurrency_policy", "uid"}, nil,
 	)
 	descCronJobCreated = prometheus.NewDesc(
 		"kube_cronjob_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "cronjob"}, nil,
+		[]string{"namespace", "cronjob", "uid"}, nil,
 	)
 	descCronJobStatusActive = prometheus.NewDesc(
 		"kube_cronjob_status_active",
 		"Active holds pointers to currently running jobs.",
-		[]string{"namespace", "cronjob"}, nil,
+		[]string{"namespace", "cronjob", "uid"}, nil,
 	)
 	descCronJobStatusLastScheduleTime = prometheus.NewDesc(
 		"kube_cronjob_status_last_schedule_time",
 		"LastScheduleTime keeps information of when was the last time the job was successfully scheduled.",
-		[]string{"namespace", "cronjob"}, nil,
+		[]string{"namespace", "cronjob", "uid"}, nil,
 	)
 	descCronJobSpecSuspend = prometheus.NewDesc(
 		"kube_cronjob_spec_suspend",
 		"Suspend flag tells the controller to suspend subsequent executions.",
-		[]string{"namespace", "cronjob"}, nil,
+		[]string{"namespace", "cronjob", "uid"}, nil,
 	)
 	descCronJobSpecStartingDeadlineSeconds = prometheus.NewDesc(
 		"kube_cronjob_spec_starting_deadline_seconds",
 		"Deadline in seconds for starting the job if it misses scheduled time for any reason.",
-		[]string{"namespace", "cronjob"}, nil,
+		[]string{"namespace", "cronjob", "uid"}, nil,
 	)
 	descCronJobNextScheduledTime = prometheus.NewDesc(
 		"kube_cronjob_next_schedule_time",
 		"Next time the cronjob should be scheduled. The time after lastScheduleTime, or after the cron job's creation time if it's never been scheduled. Use this to determine if the job is delayed.",
-		[]string{"namespace", "cronjob"}, nil,
+		[]string{"namespace", "cronjob", "uid"}, nil,
 	)
 )
 
@@ -169,7 +169,7 @@ func cronJobLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (jc *cronJobCollector) collectCronJob(ch chan<- prometheus.Metric, j batchv1beta1.CronJob) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{j.Namespace, j.Name}, lv...)
+		lv = append([]string{j.Namespace, j.Name, string(j.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 

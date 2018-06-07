@@ -29,16 +29,16 @@ import (
 var (
 	descNamespaceLabelsName          = "kube_namespace_labels"
 	descNamespaceLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descNamespaceLabelsDefaultLabels = []string{"namespace"}
+	descNamespaceLabelsDefaultLabels = []string{"namespace", "uid"}
 
 	descNamespaceAnnotationsName          = "kube_namespace_annotations"
 	descNamespaceAnnotationsHelp          = "Kubernetes annotations converted to Prometheus labels."
-	descNamespaceAnnotationsDefaultLabels = []string{"namespace"}
+	descNamespaceAnnotationsDefaultLabels = []string{"namespace", "uid"}
 
 	descNamespaceCreated = prometheus.NewDesc(
 		"kube_namespace_created",
 		"Unix creation timestamp",
-		[]string{"namespace"}, nil,
+		[]string{"namespace", "uid"}, nil,
 	)
 
 	descNamespaceLabels = prometheus.NewDesc(
@@ -59,6 +59,7 @@ var (
 		[]string{
 			"namespace",
 			"phase",
+			"uid",
 		}, nil,
 	)
 )

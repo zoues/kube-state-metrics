@@ -28,24 +28,24 @@ import (
 var (
 	descServiceLabelsName          = "kube_service_labels"
 	descServiceLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descServiceLabelsDefaultLabels = []string{"namespace", "service"}
+	descServiceLabelsDefaultLabels = []string{"namespace", "service", "uid"}
 
 	descServiceInfo = prometheus.NewDesc(
 		"kube_service_info",
 		"Information about service.",
-		[]string{"namespace", "service", "cluster_ip"}, nil,
+		[]string{"namespace", "service", "cluster_ip", "uid"}, nil,
 	)
 
 	descServiceCreated = prometheus.NewDesc(
 		"kube_service_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "service"}, nil,
+		[]string{"namespace", "service", "uid"}, nil,
 	)
 
 	descServiceSpecType = prometheus.NewDesc(
 		"kube_service_spec_type",
 		"Type about service.",
-		[]string{"namespace", "service", "type"}, nil,
+		[]string{"namespace", "service", "type", "uid"}, nil,
 	)
 
 	descServiceLabels = prometheus.NewDesc(
@@ -126,7 +126,7 @@ func serviceLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (sc *serviceCollector) collectService(ch chan<- prometheus.Metric, s v1.Service) {
 	addConstMetric := func(desc *prometheus.Desc, t prometheus.ValueType, v float64, lv ...string) {
-		lv = append([]string{s.Namespace, s.Name}, lv...)
+		lv = append([]string{s.Namespace, s.Name, string(s.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, t, v, lv...)
 	}
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {

@@ -28,7 +28,7 @@ import (
 var (
 	descJobLabelsName          = "kube_job_labels"
 	descJobLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descJobLabelsDefaultLabels = []string{"namespace", "job"}
+	descJobLabelsDefaultLabels = []string{"namespace", "job", "uid"}
 
 	descJobLabels = prometheus.NewDesc(
 		descJobLabelsName,
@@ -39,62 +39,62 @@ var (
 	descJobInfo = prometheus.NewDesc(
 		"kube_job_info",
 		"Information about job.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobCreated = prometheus.NewDesc(
 		"kube_job_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobSpecParallelism = prometheus.NewDesc(
 		"kube_job_spec_parallelism",
 		"The maximum desired number of pods the job should run at any given time.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobSpecCompletions = prometheus.NewDesc(
 		"kube_job_spec_completions",
 		"The desired number of successfully finished pods the job should be run with.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobSpecActiveDeadlineSeconds = prometheus.NewDesc(
 		"kube_job_spec_active_deadline_seconds",
 		"The duration in seconds relative to the startTime that the job may be active before the system tries to terminate it.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobStatusSucceeded = prometheus.NewDesc(
 		"kube_job_status_succeeded",
 		"The number of pods which reached Phase Succeeded.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobStatusFailed = prometheus.NewDesc(
 		"kube_job_status_failed",
 		"The number of pods which reached Phase Failed.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobStatusActive = prometheus.NewDesc(
 		"kube_job_status_active",
 		"The number of actively running pods.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobConditionComplete = prometheus.NewDesc(
 		"kube_job_complete",
 		"The job has completed its execution.",
-		[]string{"namespace", "job", "condition"}, nil,
+		[]string{"namespace", "job", "condition", "uid"}, nil,
 	)
 	descJobConditionFailed = prometheus.NewDesc(
 		"kube_job_failed",
 		"The job has failed its execution.",
-		[]string{"namespace", "job", "condition"}, nil,
+		[]string{"namespace", "job", "condition", "uid"}, nil,
 	)
 	descJobStatusStartTime = prometheus.NewDesc(
 		"kube_job_status_start_time",
 		"StartTime represents time when the job was acknowledged by the Job Manager.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 	descJobStatusCompletionTime = prometheus.NewDesc(
 		"kube_job_status_completion_time",
 		"CompletionTime represents time when the job was completed.",
-		[]string{"namespace", "job"}, nil,
+		[]string{"namespace", "job", "uid"}, nil,
 	)
 )
 
@@ -179,7 +179,7 @@ func jobLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (jc *jobCollector) collectJob(ch chan<- prometheus.Metric, j v1batch.Job) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{j.Namespace, j.Name}, lv...)
+		lv = append([]string{j.Namespace, j.Name, string(j.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 

@@ -28,54 +28,54 @@ import (
 var (
 	descStatefulSetLabelsName          = "kube_statefulset_labels"
 	descStatefulSetLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descStatefulSetLabelsDefaultLabels = []string{"namespace", "statefulset"}
+	descStatefulSetLabelsDefaultLabels = []string{"namespace", "statefulset", "uid"}
 
 	descStatefulSetCreated = prometheus.NewDesc(
 		"kube_statefulset_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetStatusReplicas = prometheus.NewDesc(
 		"kube_statefulset_status_replicas",
 		"The number of replicas per StatefulSet.",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetStatusReplicasCurrent = prometheus.NewDesc(
 		"kube_statefulset_status_replicas_current",
 		"The number of current replicas per StatefulSet.",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetStatusReplicasReady = prometheus.NewDesc(
 		"kube_statefulset_status_replicas_ready",
 		"The number of ready replicas per StatefulSet.",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetStatusReplicasUpdated = prometheus.NewDesc(
 		"kube_statefulset_status_replicas_updated",
 		"The number of updated replicas per StatefulSet.",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetStatusObservedGeneration = prometheus.NewDesc(
 		"kube_statefulset_status_observed_generation",
 		"The generation observed by the StatefulSet controller.",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetSpecReplicas = prometheus.NewDesc(
 		"kube_statefulset_replicas",
 		"Number of desired pods for a StatefulSet.",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetMetadataGeneration = prometheus.NewDesc(
 		"kube_statefulset_metadata_generation",
 		"Sequence number representing a specific generation of the desired state for the StatefulSet.",
-		[]string{"namespace", "statefulset"}, nil,
+		[]string{"namespace", "statefulset", "uid"}, nil,
 	)
 
 	descStatefulSetLabels = prometheus.NewDesc(
@@ -161,7 +161,7 @@ func statefulSetLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (dc *statefulSetCollector) collectStatefulSet(ch chan<- prometheus.Metric, statefulSet v1beta1.StatefulSet) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{statefulSet.Namespace, statefulSet.Name}, lv...)
+		lv = append([]string{statefulSet.Namespace, statefulSet.Name, string(statefulSet.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 	if !statefulSet.CreationTimestamp.IsZero() {

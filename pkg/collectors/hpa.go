@@ -29,32 +29,32 @@ import (
 var (
 	descHorizontalPodAutoscalerLabelsName          = "kube_hpa_labels"
 	descHorizontalPodAutoscalerLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descHorizontalPodAutoscalerLabelsDefaultLabels = []string{"namespace", "hpa"}
+	descHorizontalPodAutoscalerLabelsDefaultLabels = []string{"namespace", "hpa", "uid"}
 
 	descHorizontalPodAutoscalerMetadataGeneration = prometheus.NewDesc(
 		"kube_hpa_metadata_generation",
 		"The generation observed by the HorizontalPodAutoscaler controller.",
-		[]string{"namespace", "hpa"}, nil,
+		[]string{"namespace", "hpa", "uid"}, nil,
 	)
 	descHorizontalPodAutoscalerSpecMaxReplicas = prometheus.NewDesc(
 		"kube_hpa_spec_max_replicas",
 		"Upper limit for the number of pods that can be set by the autoscaler; cannot be smaller than MinReplicas.",
-		[]string{"namespace", "hpa"}, nil,
+		[]string{"namespace", "hpa", "uid"}, nil,
 	)
 	descHorizontalPodAutoscalerSpecMinReplicas = prometheus.NewDesc(
 		"kube_hpa_spec_min_replicas",
 		"Lower limit for the number of pods that can be set by the autoscaler, default 1.",
-		[]string{"namespace", "hpa"}, nil,
+		[]string{"namespace", "hpa", "uid"}, nil,
 	)
 	descHorizontalPodAutoscalerStatusCurrentReplicas = prometheus.NewDesc(
 		"kube_hpa_status_current_replicas",
 		"Current number of replicas of pods managed by this autoscaler.",
-		[]string{"namespace", "hpa"}, nil,
+		[]string{"namespace", "hpa", "uid"}, nil,
 	)
 	descHorizontalPodAutoscalerStatusDesiredReplicas = prometheus.NewDesc(
 		"kube_hpa_status_desired_replicas",
 		"Desired number of replicas of pods managed by this autoscaler.",
-		[]string{"namespace", "hpa"}, nil,
+		[]string{"namespace", "hpa", "uid"}, nil,
 	)
 	descHorizontalPodAutoscalerLabels = prometheus.NewDesc(
 		descHorizontalPodAutoscalerLabelsName,
@@ -64,7 +64,7 @@ var (
 	descHorizontalPodAutoscalerCondition = prometheus.NewDesc(
 		"kube_hpa_status_condition",
 		"The condition of this autoscaler.",
-		[]string{"namespace", "hpa", "condition", "status"}, nil,
+		[]string{"namespace", "hpa", "condition", "status", "uid"}, nil,
 	)
 )
 
@@ -141,7 +141,7 @@ func hpaLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (hc *hpaCollector) collectHPA(ch chan<- prometheus.Metric, h autoscaling.HorizontalPodAutoscaler) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{h.Namespace, h.Name}, lv...)
+		lv = append([]string{h.Namespace, h.Name, string(h.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 	labelKeys, labelValues := kubeLabelsToPrometheusLabels(h.Labels)

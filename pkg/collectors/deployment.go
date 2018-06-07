@@ -29,69 +29,69 @@ import (
 var (
 	descDeploymentLabelsName          = "kube_deployment_labels"
 	descDeploymentLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descDeploymentLabelsDefaultLabels = []string{"namespace", "deployment"}
+	descDeploymentLabelsDefaultLabels = []string{"namespace", "deployment", "uid"}
 
 	descDeploymentCreated = prometheus.NewDesc(
 		"kube_deployment_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentStatusReplicas = prometheus.NewDesc(
 		"kube_deployment_status_replicas",
 		"The number of replicas per deployment.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 	descDeploymentStatusReplicasAvailable = prometheus.NewDesc(
 		"kube_deployment_status_replicas_available",
 		"The number of available replicas per deployment.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 	descDeploymentStatusReplicasUnavailable = prometheus.NewDesc(
 		"kube_deployment_status_replicas_unavailable",
 		"The number of unavailable replicas per deployment.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 	descDeploymentStatusReplicasUpdated = prometheus.NewDesc(
 		"kube_deployment_status_replicas_updated",
 		"The number of updated replicas per deployment.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentStatusObservedGeneration = prometheus.NewDesc(
 		"kube_deployment_status_observed_generation",
 		"The generation observed by the deployment controller.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentSpecReplicas = prometheus.NewDesc(
 		"kube_deployment_spec_replicas",
 		"Number of desired pods for a deployment.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentSpecPaused = prometheus.NewDesc(
 		"kube_deployment_spec_paused",
 		"Whether the deployment is paused and will not be processed by the deployment controller.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentStrategyRollingUpdateMaxUnavailable = prometheus.NewDesc(
 		"kube_deployment_spec_strategy_rollingupdate_max_unavailable",
 		"Maximum number of unavailable replicas during a rolling update of a deployment.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentStrategyRollingUpdateMaxSurge = prometheus.NewDesc(
 		"kube_deployment_spec_strategy_rollingupdate_max_surge",
 		"Maximum number of replicas that can be scheduled above the desired number of replicas during a rolling update of a deployment.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentMetadataGeneration = prometheus.NewDesc(
 		"kube_deployment_metadata_generation",
 		"Sequence number representing a specific generation of the desired state.",
-		[]string{"namespace", "deployment"}, nil,
+		[]string{"namespace", "deployment", "uid"}, nil,
 	)
 
 	descDeploymentLabels = prometheus.NewDesc(
@@ -181,7 +181,7 @@ func deploymentLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (dc *deploymentCollector) collectDeployment(ch chan<- prometheus.Metric, d v1beta1.Deployment) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{d.Namespace, d.Name}, lv...)
+		lv = append([]string{d.Namespace, d.Name, string(d.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 	labelKeys, labelValues := kubeLabelsToPrometheusLabels(d.Labels)

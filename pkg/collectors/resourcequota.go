@@ -29,7 +29,7 @@ var (
 	descResourceQuotaCreated = prometheus.NewDesc(
 		"kube_resourcequota_created",
 		"Unix creation timestamp",
-		[]string{"resourcequota", "namespace"}, nil,
+		[]string{"resourcequota", "namespace", "uid"}, nil,
 	)
 	descResourceQuota = prometheus.NewDesc(
 		"kube_resourcequota",
@@ -39,6 +39,7 @@ var (
 			"namespace",
 			"resource",
 			"type",
+			"uid",
 		}, nil,
 	)
 )
@@ -104,7 +105,7 @@ func (rqc *resourceQuotaCollector) Collect(ch chan<- prometheus.Metric) {
 
 func (rqc *resourceQuotaCollector) collectResourceQuota(ch chan<- prometheus.Metric, rq v1.ResourceQuota) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{rq.Name, rq.Namespace}, lv...)
+		lv = append([]string{rq.Name, rq.Namespace, string(rq.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 

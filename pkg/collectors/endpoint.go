@@ -30,18 +30,18 @@ import (
 var (
 	descEndpointLabelsName          = "kube_endpoint_labels"
 	descEndpointLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descEndpointLabelsDefaultLabels = []string{"namespace", "endpoint"}
+	descEndpointLabelsDefaultLabels = []string{"namespace", "endpoint", "uid"}
 
 	descEndpointInfo = prometheus.NewDesc(
 		"kube_endpoint_info",
 		"Information about endpoint.",
-		[]string{"namespace", "endpoint"}, nil,
+		[]string{"namespace", "endpoint", "uid"}, nil,
 	)
 
 	descEndpointCreated = prometheus.NewDesc(
 		"kube_endpoint_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "endpoint"}, nil,
+		[]string{"namespace", "endpoint", "uid"}, nil,
 	)
 
 	descEndpointLabels = prometheus.NewDesc(
@@ -53,12 +53,12 @@ var (
 	descEndpointAddressAvailable = prometheus.NewDesc(
 		"kube_endpoint_address_available",
 		"Number of addresses available in endpoint.",
-		[]string{"namespace", "endpoint"}, nil)
+		[]string{"namespace", "endpoint", "uid"}, nil)
 
 	descEndpointAddressNotReady = prometheus.NewDesc(
 		"kube_endpoint_address_not_ready",
 		"Number of addresses not ready in endpoint",
-		[]string{"namespace", "endpoint"}, nil)
+		[]string{"namespace", "endpoint", "uid"}, nil)
 )
 
 type EndpointLister func() ([]v1.Endpoints, error)
@@ -125,7 +125,7 @@ func (ec *endpointCollector) Collect(ch chan<- prometheus.Metric) {
 
 func (ec *endpointCollector) collectEndpoints(ch chan<- prometheus.Metric, e v1.Endpoints) {
 	addConstMetric := func(desc *prometheus.Desc, t prometheus.ValueType, v float64, lv ...string) {
-		lv = append([]string{e.Namespace, e.Name}, lv...)
+		lv = append([]string{e.Namespace, e.Name, string(e.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, t, v, lv...)
 	}
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {

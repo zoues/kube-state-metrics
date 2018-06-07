@@ -29,37 +29,37 @@ var (
 	descReplicaSetCreated = prometheus.NewDesc(
 		"kube_replicaset_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "replicaset"}, nil,
+		[]string{"namespace", "replicaset", "uid"}, nil,
 	)
 	descReplicaSetStatusReplicas = prometheus.NewDesc(
 		"kube_replicaset_status_replicas",
 		"The number of replicas per ReplicaSet.",
-		[]string{"namespace", "replicaset"}, nil,
+		[]string{"namespace", "replicaset", "uid"}, nil,
 	)
 	descReplicaSetStatusFullyLabeledReplicas = prometheus.NewDesc(
 		"kube_replicaset_status_fully_labeled_replicas",
 		"The number of fully labeled replicas per ReplicaSet.",
-		[]string{"namespace", "replicaset"}, nil,
+		[]string{"namespace", "replicaset", "uid"}, nil,
 	)
 	descReplicaSetStatusReadyReplicas = prometheus.NewDesc(
 		"kube_replicaset_status_ready_replicas",
 		"The number of ready replicas per ReplicaSet.",
-		[]string{"namespace", "replicaset"}, nil,
+		[]string{"namespace", "replicaset", "uid"}, nil,
 	)
 	descReplicaSetStatusObservedGeneration = prometheus.NewDesc(
 		"kube_replicaset_status_observed_generation",
 		"The generation observed by the ReplicaSet controller.",
-		[]string{"namespace", "replicaset"}, nil,
+		[]string{"namespace", "replicaset", "uid"}, nil,
 	)
 	descReplicaSetSpecReplicas = prometheus.NewDesc(
 		"kube_replicaset_spec_replicas",
 		"Number of desired pods for a ReplicaSet.",
-		[]string{"namespace", "replicaset"}, nil,
+		[]string{"namespace", "replicaset", "uid"}, nil,
 	)
 	descReplicaSetMetadataGeneration = prometheus.NewDesc(
 		"kube_replicaset_metadata_generation",
 		"Sequence number representing a specific generation of the desired state.",
-		[]string{"namespace", "replicaset"}, nil,
+		[]string{"namespace", "replicaset", "uid"}, nil,
 	)
 )
 
@@ -129,7 +129,7 @@ func (dc *replicasetCollector) Collect(ch chan<- prometheus.Metric) {
 
 func (dc *replicasetCollector) collectReplicaSet(ch chan<- prometheus.Metric, d v1beta1.ReplicaSet) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{d.Namespace, d.Name}, lv...)
+		lv = append([]string{d.Namespace, d.Name, string(d.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 	if !d.CreationTimestamp.IsZero() {

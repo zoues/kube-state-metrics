@@ -28,52 +28,52 @@ import (
 var (
 	descDaemonSetLabelsName          = "kube_daemonset_labels"
 	descDaemonSetLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descDaemonSetLabelsDefaultLabels = []string{"namespace", "daemonset"}
+	descDaemonSetLabelsDefaultLabels = []string{"namespace", "daemonset", "uid"}
 
 	descDaemonSetCreated = prometheus.NewDesc(
 		"kube_daemonset_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetCurrentNumberScheduled = prometheus.NewDesc(
 		"kube_daemonset_status_current_number_scheduled",
 		"The number of nodes running at least one daemon pod and are supposed to.",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetDesiredNumberScheduled = prometheus.NewDesc(
 		"kube_daemonset_status_desired_number_scheduled",
 		"The number of nodes that should be running the daemon pod.",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetNumberAvailable = prometheus.NewDesc(
 		"kube_daemonset_status_number_available",
 		"The number of nodes that should be running the daemon pod and have one or more of the daemon pod running and available",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetNumberMisscheduled = prometheus.NewDesc(
 		"kube_daemonset_status_number_misscheduled",
 		"The number of nodes running a daemon pod but are not supposed to.",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetNumberReady = prometheus.NewDesc(
 		"kube_daemonset_status_number_ready",
 		"The number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetNumberUnavailable = prometheus.NewDesc(
 		"kube_daemonset_status_number_unavailable",
 		"The number of nodes that should be running the daemon pod and have none of the daemon pod running and available",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetUpdatedNumberScheduled = prometheus.NewDesc(
 		"kube_daemonset_updated_number_scheduled",
 		"The total number of nodes that are running updated daemon pod",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetMetadataGeneration = prometheus.NewDesc(
 		"kube_daemonset_metadata_generation",
 		"Sequence number representing a specific generation of the desired state.",
-		[]string{"namespace", "daemonset"}, nil,
+		[]string{"namespace", "daemonset", "uid"}, nil,
 	)
 	descDaemonSetLabels = prometheus.NewDesc(
 		descDaemonSetLabelsName,
@@ -160,7 +160,7 @@ func DaemonSetLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (dc *daemonsetCollector) collectDaemonSet(ch chan<- prometheus.Metric, d v1beta1.DaemonSet) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{d.Namespace, d.Name}, lv...)
+		lv = append([]string{d.Namespace, d.Name, string(d.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 	if !d.CreationTimestamp.IsZero() {

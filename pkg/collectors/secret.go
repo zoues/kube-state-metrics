@@ -28,18 +28,18 @@ import (
 var (
 	descSecretLabelsName          = "kube_secret_labels"
 	descSecretLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descSecretLabelsDefaultLabels = []string{"namespace", "secret"}
+	descSecretLabelsDefaultLabels = []string{"namespace", "secret", "uid"}
 
 	descSecretInfo = prometheus.NewDesc(
 		"kube_secret_info",
 		"Information about secret.",
-		[]string{"namespace", "secret"}, nil,
+		[]string{"namespace", "secret", "uid"}, nil,
 	)
 
 	descSecretType = prometheus.NewDesc(
 		"kube_secret_type",
 		"Type about secret.",
-		[]string{"namespace", "secret", "type"}, nil,
+		[]string{"namespace", "secret", "type", "uid"}, nil,
 	)
 
 	descSecretLabels = prometheus.NewDesc(
@@ -51,13 +51,13 @@ var (
 	descSecretCreated = prometheus.NewDesc(
 		"kube_secret_created",
 		"Unix creation timestamp",
-		[]string{"namespace", "secret"}, nil,
+		[]string{"namespace", "secret", "uid"}, nil,
 	)
 
 	descSecretMetadataResourceVersion = prometheus.NewDesc(
 		"kube_secret_metadata_resource_version",
 		"Resource version representing a specific version of secret.",
-		[]string{"namespace", "secret", "resource_version"}, nil,
+		[]string{"namespace", "secret", "resource_version", "uid"}, nil,
 	)
 )
 
@@ -134,7 +134,7 @@ func secretLabelsDesc(labelKeys []string) *prometheus.Desc {
 
 func (sc *secretCollector) collectSecret(ch chan<- prometheus.Metric, s v1.Secret) {
 	addConstMetric := func(desc *prometheus.Desc, t prometheus.ValueType, v float64, lv ...string) {
-		lv = append([]string{s.Namespace, s.Name}, lv...)
+		lv = append([]string{s.Namespace, s.Name, string(s.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, t, v, lv...)
 	}
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {

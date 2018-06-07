@@ -28,7 +28,7 @@ import (
 var (
 	descPersistentVolumeLabelsName          = "kube_persistentvolume_labels"
 	descPersistentVolumeLabelsHelp          = "Kubernetes labels converted to Prometheus labels."
-	descPersistentVolumeLabelsDefaultLabels = []string{"persistentvolume"}
+	descPersistentVolumeLabelsDefaultLabels = []string{"persistentvolume", "uid"}
 
 	descPersistentVolumeLabels = prometheus.NewDesc(
 		descPersistentVolumeLabelsName,
@@ -42,13 +42,14 @@ var (
 		[]string{
 			"persistentvolume",
 			"phase",
+			"uid",
 		}, nil,
 	)
 
 	descPersistentVolumeInfo = prometheus.NewDesc(
 		"kube_persistentvolume_info",
 		"Information about persistentvolume.",
-		[]string{"persistentvolume", "storageclass"}, nil,
+		[]string{"persistentvolume", "storageclass", "uid"}, nil,
 	)
 )
 
@@ -123,7 +124,7 @@ func (collector *persistentVolumeCollector) Collect(ch chan<- prometheus.Metric)
 
 func (collector *persistentVolumeCollector) collectPersistentVolume(ch chan<- prometheus.Metric, pv v1.PersistentVolume) {
 	addGauge := func(desc *prometheus.Desc, v float64, lv ...string) {
-		lv = append([]string{pv.Name}, lv...)
+		lv = append([]string{pv.Name, string(pv.UID)}, lv...)
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, lv...)
 	}
 
