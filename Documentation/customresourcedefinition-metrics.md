@@ -1,4 +1,4 @@
-# Stateful Set Metrics
+# CustomResourceDefinition Metrics
 
 | Metric name| Metric type | Labels/tags | Status |
 | ---------- | ----------- | ----------- | ----------- |
