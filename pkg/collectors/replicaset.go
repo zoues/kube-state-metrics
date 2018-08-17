@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	"k8s.io/api/extensions/v1beta1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -77,11 +76,11 @@ func (l ReplicaSetLister) List() ([]v1beta1.ReplicaSet, error) {
 	return l()
 }
 
-func RegisterReplicaSetCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.ExtensionsV1beta1().RESTClient()
-	glog.Infof("collect replicaset with %s", client.APIVersion())
+func RegisterReplicaSetCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.ExtensionsV1beta1().RESTClient()
+	glog.Infof("collect replicaset with %s", k8sclient.APIVersion())
 
-	rsinfs := NewSharedInformerList(client, "replicasets", namespaces, &v1beta1.ReplicaSet{})
+	rsinfs := NewSharedInformerList(k8sclient, "replicasets", namespaces, &v1beta1.ReplicaSet{})
 
 	replicaSetLister := ReplicaSetLister(func() (replicasets []v1beta1.ReplicaSet, err error) {
 		for _, rsinf := range *rsinfs {

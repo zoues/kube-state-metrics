@@ -22,7 +22,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	autoscaling "k8s.io/api/autoscaling/v2beta1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -81,10 +80,10 @@ func (l HPALister) List() (autoscaling.HorizontalPodAutoscalerList, error) {
 	return l()
 }
 
-func RegisterHorizontalPodAutoScalerCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.AutoscalingV2beta1().RESTClient()
-	glog.Infof("collect hpa with %s", client.APIVersion())
-	hpainfs := NewSharedInformerList(client, "horizontalpodautoscalers", namespaces, &autoscaling.HorizontalPodAutoscaler{})
+func RegisterHorizontalPodAutoScalerCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.AutoscalingV2beta1().RESTClient()
+	glog.Infof("collect hpa with %s", k8sclient.APIVersion())
+	hpainfs := NewSharedInformerList(k8sclient, "horizontalpodautoscalers", namespaces, &autoscaling.HorizontalPodAutoscaler{})
 
 	hpaLister := HPALister(func() (hpas autoscaling.HorizontalPodAutoscalerList, err error) {
 		for _, hpainf := range *hpainfs {

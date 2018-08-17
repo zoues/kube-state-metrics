@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -72,11 +71,11 @@ func (l SecretLister) List() ([]v1.Secret, error) {
 	return l()
 }
 
-func RegisterSecretCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect secret with %s", client.APIVersion())
+func RegisterSecretCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect secret with %s", k8sclient.APIVersion())
 
-	sinfs := NewSharedInformerList(client, "secrets", namespaces, &v1.Secret{})
+	sinfs := NewSharedInformerList(k8sclient, "secrets", namespaces, &v1.Secret{})
 
 	secretLister := SecretLister(func() (secrets []v1.Secret, err error) {
 		for _, sinf := range *sinfs {

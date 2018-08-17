@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -62,11 +61,11 @@ func (l PersistentVolumeClaimLister) List() (v1.PersistentVolumeClaimList, error
 	return l()
 }
 
-func RegisterPersistentVolumeClaimCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect persistentvolumeclaim with %s", client.APIVersion())
+func RegisterPersistentVolumeClaimCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect persistentvolumeclaim with %s", k8sclient.APIVersion())
 
-	pvcinfs := NewSharedInformerList(client, "persistentvolumeclaims", namespaces, &v1.PersistentVolumeClaim{})
+	pvcinfs := NewSharedInformerList(k8sclient, "persistentvolumeclaims", namespaces, &v1.PersistentVolumeClaim{})
 
 	persistentVolumeClaimLister := PersistentVolumeClaimLister(func() (pvcs v1.PersistentVolumeClaimList, err error) {
 		for _, pvcinf := range *pvcinfs {

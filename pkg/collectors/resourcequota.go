@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -50,11 +49,11 @@ func (l ResourceQuotaLister) List() (v1.ResourceQuotaList, error) {
 	return l()
 }
 
-func RegisterResourceQuotaCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect resourcequota with %s", client.APIVersion())
+func RegisterResourceQuotaCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect resourcequota with %s", k8sclient.APIVersion())
 
-	rqinfs := NewSharedInformerList(client, "resourcequotas", namespaces, &v1.ResourceQuota{})
+	rqinfs := NewSharedInformerList(k8sclient, "resourcequotas", namespaces, &v1.ResourceQuota{})
 
 	resourceQuotaLister := ResourceQuotaLister(func() (quotas v1.ResourceQuotaList, err error) {
 		for _, rqinf := range *rqinfs {

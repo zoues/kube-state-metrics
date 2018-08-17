@@ -25,7 +25,6 @@ import (
 	"github.com/robfig/cron"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	"k8s.io/kube-state-metrics/pkg/options"
@@ -92,11 +91,11 @@ func (l CronJobLister) List() ([]batchv1beta1.CronJob, error) {
 	return l()
 }
 
-func RegisterCronJobCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.BatchV1beta1().RESTClient()
-	glog.Infof("collect cronjob with %s", client.APIVersion())
+func RegisterCronJobCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.BatchV1beta1().RESTClient()
+	glog.Infof("collect cronjob with %s", k8sclient.APIVersion())
 
-	cjinfs := NewSharedInformerList(client, "cronjobs", namespaces, &batchv1beta1.CronJob{})
+	cjinfs := NewSharedInformerList(k8sclient, "cronjobs", namespaces, &batchv1beta1.CronJob{})
 
 	cronJobLister := CronJobLister(func() (cronjobs []batchv1beta1.CronJob, err error) {
 		for _, cjinf := range *cjinfs {

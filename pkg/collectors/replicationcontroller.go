@@ -22,7 +22,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -85,11 +84,11 @@ func (l ReplicationControllerLister) List() ([]v1.ReplicationController, error) 
 	return l()
 }
 
-func RegisterReplicationControllerCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect replicationcontroller with %s", client.APIVersion())
+func RegisterReplicationControllerCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect replicationcontroller with %s", k8sclient.APIVersion())
 
-	rcinfs := NewSharedInformerList(client, "replicationcontrollers", namespaces, &v1.ReplicationController{})
+	rcinfs := NewSharedInformerList(k8sclient, "replicationcontrollers", namespaces, &v1.ReplicationController{})
 
 	replicationControllerLister := ReplicationControllerLister(func() (rcs []v1.ReplicationController, err error) {
 		for _, rcinf := range *rcinfs {

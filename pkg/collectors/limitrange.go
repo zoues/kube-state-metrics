@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -48,11 +47,11 @@ func (l LimitRangeLister) List() (v1.LimitRangeList, error) {
 	return l()
 }
 
-func RegisterLimitRangeCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect limitrange with %s", client.APIVersion())
+func RegisterLimitRangeCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect limitrange with %s", k8sclient.APIVersion())
 
-	rqinfs := NewSharedInformerList(client, "limitranges", namespaces, &v1.LimitRange{})
+	rqinfs := NewSharedInformerList(k8sclient, "limitranges", namespaces, &v1.LimitRange{})
 
 	limitRangeLister := LimitRangeLister(func() (ranges v1.LimitRangeList, err error) {
 		for _, rqinf := range *rqinfs {

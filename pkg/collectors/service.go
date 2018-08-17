@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -65,11 +64,11 @@ func (l ServiceLister) List() ([]v1.Service, error) {
 	return l()
 }
 
-func RegisterServiceCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect service with %s", client.APIVersion())
+func RegisterServiceCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect service with %s", k8sclient.APIVersion())
 
-	sinfs := NewSharedInformerList(client, "services", namespaces, &v1.Service{})
+	sinfs := NewSharedInformerList(k8sclient, "services", namespaces, &v1.Service{})
 
 	serviceLister := ServiceLister(func() (services []v1.Service, err error) {
 		for _, sinf := range *sinfs {

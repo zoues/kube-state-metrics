@@ -29,7 +29,14 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/kube-state-metrics/pkg/options"
+
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 )
+
+type ClientSet struct {
+	KubeClient kubernetes.Clientset
+	CRDClient  apiextensionsclient.ApiextensionsV1beta1Client
+}
 
 var (
 	resyncPeriod = 5 * time.Minute
@@ -53,26 +60,27 @@ var (
 	invalidLabelCharRE = regexp.MustCompile(`[^a-zA-Z0-9_]`)
 )
 
-var AvailableCollectors = map[string]func(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options){
-	"cronjobs":                 RegisterCronJobCollector,
-	"daemonsets":               RegisterDaemonSetCollector,
-	"deployments":              RegisterDeploymentCollector,
-	"jobs":                     RegisterJobCollector,
-	"limitranges":              RegisterLimitRangeCollector,
-	"nodes":                    RegisterNodeCollector,
-	"pods":                     RegisterPodCollector,
-	"replicasets":              RegisterReplicaSetCollector,
-	"replicationcontrollers":   RegisterReplicationControllerCollector,
-	"resourcequotas":           RegisterResourceQuotaCollector,
-	"services":                 RegisterServiceCollector,
-	"statefulsets":             RegisterStatefulSetCollector,
-	"persistentvolumes":        RegisterPersistentVolumeCollector,
-	"persistentvolumeclaims":   RegisterPersistentVolumeClaimCollector,
-	"namespaces":               RegisterNamespaceCollector,
-	"horizontalpodautoscalers": RegisterHorizontalPodAutoScalerCollector,
-	"endpoints":                RegisterEndpointCollector,
-	"secrets":                  RegisterSecretCollector,
-	"configmaps":               RegisterConfigMapCollector,
+var AvailableCollectors = map[string]func(registry prometheus.Registerer, kubeClient ClientSet, namespaces []string, opts *options.Options){
+	"cronjobs":                  RegisterCronJobCollector,
+	"daemonsets":                RegisterDaemonSetCollector,
+	"deployments":               RegisterDeploymentCollector,
+	"jobs":                      RegisterJobCollector,
+	"limitranges":               RegisterLimitRangeCollector,
+	"nodes":                     RegisterNodeCollector,
+	"pods":                      RegisterPodCollector,
+	"replicasets":               RegisterReplicaSetCollector,
+	"replicationcontrollers":    RegisterReplicationControllerCollector,
+	"resourcequotas":            RegisterResourceQuotaCollector,
+	"services":                  RegisterServiceCollector,
+	"statefulsets":              RegisterStatefulSetCollector,
+	"persistentvolumes":         RegisterPersistentVolumeCollector,
+	"persistentvolumeclaims":    RegisterPersistentVolumeClaimCollector,
+	"namespaces":                RegisterNamespaceCollector,
+	"horizontalpodautoscalers":  RegisterHorizontalPodAutoScalerCollector,
+	"endpoints":                 RegisterEndpointCollector,
+	"secrets":                   RegisterSecretCollector,
+	"configmaps":                RegisterConfigMapCollector,
+	"customresourcedefinitions": RegisterCustomResourceDefinitionCollector,
 }
 
 type SharedInformerList []cache.SharedInformer

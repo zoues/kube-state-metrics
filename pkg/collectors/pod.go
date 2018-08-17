@@ -24,7 +24,6 @@ import (
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/constant"
 	"k8s.io/kube-state-metrics/pkg/options"
 	"k8s.io/kubernetes/pkg/apis/core/v1/helper"
@@ -202,11 +201,11 @@ func (l PodLister) List() ([]v1.Pod, error) {
 	return l()
 }
 
-func RegisterPodCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect pod with %s", client.APIVersion())
+func RegisterPodCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect pod with %s", k8sclient.APIVersion())
 
-	pinfs := NewSharedInformerList(client, "pods", namespaces, &v1.Pod{})
+	pinfs := NewSharedInformerList(k8sclient, "pods", namespaces, &v1.Pod{})
 
 	podLister := PodLister(func() (pods []v1.Pod, err error) {
 		for _, pinf := range *pinfs {

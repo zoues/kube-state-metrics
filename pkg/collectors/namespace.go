@@ -22,7 +22,6 @@ import (
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -70,11 +69,11 @@ func (l NamespaceLister) List() ([]v1.Namespace, error) {
 }
 
 // RegisterNamespaceCollector registry namespace collector
-func RegisterNamespaceCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect namespace with %s", client.APIVersion())
+func RegisterNamespaceCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect namespace with %s", k8sclient.APIVersion())
 
-	nsinfs := NewSharedInformerList(client, "namespaces", []string{metav1.NamespaceAll}, &v1.Namespace{})
+	nsinfs := NewSharedInformerList(k8sclient, "namespaces", []string{metav1.NamespaceAll}, &v1.Namespace{})
 
 	namespaceLister := NamespaceLister(func() (namespaces []v1.Namespace, err error) {
 		for _, nsinf := range *nsinfs {

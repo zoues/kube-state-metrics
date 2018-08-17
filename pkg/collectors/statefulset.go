@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	"k8s.io/api/apps/v1beta1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -92,11 +91,11 @@ func (l StatefulSetLister) List() ([]v1beta1.StatefulSet, error) {
 	return l()
 }
 
-func RegisterStatefulSetCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.AppsV1beta1().RESTClient()
-	glog.Infof("collect statefulset with %s", client.APIVersion())
+func RegisterStatefulSetCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.AppsV1beta1().RESTClient()
+	glog.Infof("collect statefulset with %s", k8sclient.APIVersion())
 
-	dinfs := NewSharedInformerList(client, "statefulsets", namespaces, &v1beta1.StatefulSet{})
+	dinfs := NewSharedInformerList(k8sclient, "statefulsets", namespaces, &v1beta1.StatefulSet{})
 
 	statefulSetLister := StatefulSetLister(func() (statefulSets []v1beta1.StatefulSet, err error) {
 		for _, dinf := range *dinfs {

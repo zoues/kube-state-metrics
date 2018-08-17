@@ -23,7 +23,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -74,11 +73,11 @@ func (l EndpointLister) List() ([]v1.Endpoints, error) {
 	return l()
 }
 
-func RegisterEndpointCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect endpoint with %s", client.APIVersion())
+func RegisterEndpointCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect endpoint with %s", k8sclient.APIVersion())
 
-	sinfs := NewSharedInformerList(client, "endpoints", namespaces, &v1.Endpoints{})
+	sinfs := NewSharedInformerList(k8sclient, "endpoints", namespaces, &v1.Endpoints{})
 
 	endpointLister := EndpointLister(func() (endpoints []v1.Endpoints, err error) {
 		for _, sinf := range *sinfs {

@@ -22,7 +22,6 @@ import (
 	"golang.org/x/net/context"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/constant"
 	"k8s.io/kube-state-metrics/pkg/options"
 	"k8s.io/kubernetes/pkg/apis/core/v1/helper"
@@ -137,11 +136,11 @@ func (l NodeLister) List() (v1.NodeList, error) {
 	return l()
 }
 
-func RegisterNodeCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.CoreV1().RESTClient()
-	glog.Infof("collect node with %s", client.APIVersion())
+func RegisterNodeCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.CoreV1().RESTClient()
+	glog.Infof("collect node with %s", k8sclient.APIVersion())
 
-	ninfs := NewSharedInformerList(client, "nodes", []string{metav1.NamespaceAll}, &v1.Node{})
+	ninfs := NewSharedInformerList(k8sclient, "nodes", []string{metav1.NamespaceAll}, &v1.Node{})
 
 	nodeLister := NodeLister(func() (machines v1.NodeList, err error) {
 		for _, ninf := range *ninfs {

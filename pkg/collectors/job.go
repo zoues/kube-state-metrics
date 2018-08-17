@@ -21,7 +21,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	v1batch "k8s.io/api/batch/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/kube-state-metrics/pkg/options"
 )
 
@@ -117,11 +116,11 @@ func (l JobLister) List() ([]v1batch.Job, error) {
 	return l()
 }
 
-func RegisterJobCollector(registry prometheus.Registerer, kubeClient kubernetes.Interface, namespaces []string, opts *options.Options) {
-	client := kubeClient.BatchV1().RESTClient()
-	glog.Infof("collect job with %s", client.APIVersion())
+func RegisterJobCollector(registry prometheus.Registerer, client ClientSet, namespaces []string, opts *options.Options) {
+	k8sclient := client.KubeClient.BatchV1().RESTClient()
+	glog.Infof("collect job with %s", k8sclient.APIVersion())
 
-	jinfs := NewSharedInformerList(client, "jobs", namespaces, &v1batch.Job{})
+	jinfs := NewSharedInformerList(k8sclient, "jobs", namespaces, &v1batch.Job{})
 
 	jobLister := JobLister(func() (jobs []v1batch.Job, err error) {
 		for _, jinf := range *jinfs {
