@@ -32,12 +32,18 @@ the raw metrics.
   - [Compatibility matrix](#compatibility-matrix)
   - [Resource group version compatibility](#resource-group-version-compatibility)
   - [Container Image](#container-image)
+
 - [Metrics Documentation](#metrics-documentation)
+
 - [Kube-state-metrics self metrics](#kube-state-metrics-self-metrics)
+
 - [Resource recommendation](#resource-recommendation)
-- [kube-state-metrics vs. Heapster](#kube-state-metrics-vs-heapster)
+
+- [kube-state-metrics vs. Heapster(metrics-server)](#kube-state-metrics-vs-heapster)
+
 - [Setup](#setup)
   - [Building the Docker container](#building-the-docker-container)
+
 - [Usage](#usage)
   - [Kubernetes Deployment](#kubernetes-deployment)
   - [Deployment](#deployment)
@@ -55,14 +61,14 @@ All additional compatibility is only best effort, or happens to still/already be
 #### Compatibility matrix
 At most 5 kube-state-metrics releases will be recorded below.
 
-| kube-state-metrics | client-go | **Kubernetes 1.8** | **Kubernetes 1.9** | **Kubernetes 1.10** | **Kubernetes 1.11** |
-|--------------------|-----------|--------------------|--------------------|--------------------|--------------------|
-| **v1.0.x** |  4.0.0-beta.0     |         ✓          |         ✓          |         -          |         -          |
-| **v1.1.0** |  release-5.0      |         ✓          |         ✓          |         ✓          |         -          |
-| **v1.2.0** |  v6.0.0           |         ✓          |         ✓          |         ✓          |         ✓          |
-| **v1.3.0** |  v6.0.0           |         ✓          |         ✓          |         ✓          |         ✓          |
-| **v1.3.1** |  v6.0.0           |         ✓          |         ✓          |         ✓          |         ✓          |
-| **master** |  v8.0.0           |         ✓          |         ✓          |         ✓          |         ✓          |
+| kube-state-metrics | client-go    | **Kubernetes 1.8** | **Kubernetes 1.9** | **Kubernetes 1.10** | **Kubernetes 1.11** |
+| ------------------ | ------------ | ------------------ | ------------------ | ------------------- | ------------------- |
+| **v1.0.x**         | 4.0.0-beta.0 | ✓                  | ✓                  | -                   | -                   |
+| **v1.1.0**         | release-5.0  | ✓                  | ✓                  | ✓                   | -                   |
+| **v1.2.0**         | v6.0.0       | ✓                  | ✓                  | ✓                   | ✓                   |
+| **v1.3.0**         | v6.0.0       | ✓                  | ✓                  | ✓                   | ✓                   |
+| **v1.3.1**         | v6.0.0       | ✓                  | ✓                  | ✓                   | ✓                   |
+| **master**         | v8.0.0       | ✓                  | ✓                  | ✓                   | ✓                   |
 - `✓` Fully supported version range.
 - `-` The Kubernetes cluster has features the client-go library can't use (additional API objects, etc).
 
@@ -91,12 +97,12 @@ additional metrics!
 > For now the following metrics and collectors
 >
 > **metrics**
->	* kube_pod_container_resource_requests_nvidia_gpu_devices
->	* kube_pod_container_resource_limits_nvidia_gpu_devices
->	* kube_node_status_capacity_nvidia_gpu_cards
->	* kube_node_status_allocatable_nvidia_gpu_cards
->
->	are removed in kube-state-metrics v1.4.0.
+> 	* kube_pod_container_resource_requests_nvidia_gpu_devices
+> 	* kube_pod_container_resource_limits_nvidia_gpu_devices
+> 	* kube_node_status_capacity_nvidia_gpu_cards
+> 	* kube_node_status_allocatable_nvidia_gpu_cards
+> 	
+> 	are removed in kube-state-metrics v1.4.0.
 >
 > Any collectors and metrics based on alpha Kubernetes APIs are excluded from any stability guarantee,
 > which may be changed at any given release.
@@ -106,10 +112,10 @@ See the [`Documentation`](Documentation) directory for more informations of the 
 ### Kube-state-metrics self metrics
 kube-state-metrics exposes its own metrics under `--telemetry-host` and `--telemetry-port` (default 81).
 
-| Metric name | Metric type | Description | Labels/tags |
-| ----------- | ----------- | ----------- | ----------- |
-| ksm_scrape_error_total   | Counter | Total scrape errors encountered when scraping a resource | `resource`=&lt;resource name&gt; |
-| ksm_resources_per_scrape | Summary | Number of resources returned per scrape | `resource`=&lt;resource name&gt; |
+| Metric name              | Metric type | Description                              | Labels/tags                      |
+| ------------------------ | ----------- | ---------------------------------------- | -------------------------------- |
+| ksm_scrape_error_total   | Counter     | Total scrape errors encountered when scraping a resource | `resource`=&lt;resource name&gt; |
+| ksm_resources_per_scrape | Summary     | Number of resources returned per scrape  | `resource`=&lt;resource name&gt; |
 
 ### Resource recommendation
 
@@ -134,20 +140,20 @@ These numbers are based on [scalability tests](https://github.com/kubernetes/kub
 
 Note that if CPU limits are set too low, kube-state-metrics' internal queues will not be able to be worked off quickly enough, resulting in increased memory consumption as the queue length grows. If you experience problems resulting from high memory allocation, try increasing the CPU limits.
 
-### kube-state-metrics vs. Heapster
+### kube-state-metrics vs. [Heapster(metrics-server)](https://github.com/kubernetes-incubator/metrics-server)
 
-[Heapster](https://github.com/kubernetes/heapster) is a project which fetches
+[Heapster(metrics-server)](https://github.com/kubernetes-incubator/metrics-server) is a project which fetches
 metrics (such as CPU and memory utilization) from the Kubernetes API server and
 nodes and sends them to various time-series backends such as InfluxDB or Google
 Cloud Monitoring. Its most important function right now is implementing certain
 metric APIs that Kubernetes components like the horizontal pod auto-scaler
 query to make decisions.
 
-While Heapster's focus is on forwarding metrics already generated by
+While [Heapster(metrics-server)](https://github.com/kubernetes-incubator/metrics-server)'s focus is on forwarding metrics already generated by
 Kubernetes, kube-state-metrics is focused on generating completely new metrics
 from Kubernetes' object state (e.g. metrics based on deployments, replica sets,
-etc.). The reason not to extend Heapster with kube-state-metrics' abilities is
-because the concerns are fundamentally different: Heapster only needs to fetch,
+etc.). The reason not to extend [Heapster(metrics-server)](https://github.com/kubernetes-incubator/metrics-server) with kube-state-metrics' abilities is
+because the concerns are fundamentally different: [Heapster(metrics-server)](https://github.com/kubernetes-incubator/metrics-server) only needs to fetch,
 format and forward metrics that already exist, in particular from Kubernetes
 components, and write them into sinks, which are the actual monitoring
 systems. kube-state-metrics, in contrast, holds an entire snapshot of
@@ -155,11 +161,11 @@ Kubernetes state in memory and continuously generates new metrics based off of
 it but has no responsibility for exporting its metrics anywhere.
 
 In other words, kube-state-metrics itself is designed to be another source for
-Heapster (although this is not currently the case).
+[Heapster(metrics-server)](https://github.com/kubernetes-incubator/metrics-server) (although this is not currently the case).
 
 Additionally, some monitoring systems such as Prometheus do not use Heapster
 for metric collection at all and instead implement their own, but
-[Prometheus can scrape metrics from heapster itself to alert on Heapster's health](https://github.com/kubernetes/heapster/blob/master/docs/debugging.md#debuging).
+[Prometheus can scrape metrics from Heapster(metrics-server) itself to alert on Heapster(metrics-server)'s health](https://kubernetes.io/docs/tasks/debug-application-cluster/core-metrics-pipeline/).
 Having kube-state-metrics as a separate project enables access to these metrics
 from those monitoring systems.
 
